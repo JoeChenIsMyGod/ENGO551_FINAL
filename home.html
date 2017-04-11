@@ -44,6 +44,19 @@
 	// control that shows state info on hover
 	var info = L.control();
 	var marker = [];
+
+//Ajax call to DOTA2APICall.php to get match data and then display to the map	
+<script>
+	$.ajax({
+			type: 'post',
+			url: 'DOTA2APICall.php',
+			data: {},
+			success: function(response) {
+				response_array = JSON.parse(response);
+			}
+	});
+		
+</script>
 	
 	
 	
