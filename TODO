@@ -1,0 +1,9 @@
+- Create polygon layers in leaflet for each region
+- Develop algorithm to determine match play style
+- Create PHP script to obtain data from a database
+- Create form for filtering data:
+    - Skill level
+    - Region
+    - Time to first kill
+- Create word cloud
+- Look into buying a server
