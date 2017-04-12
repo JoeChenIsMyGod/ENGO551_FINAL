@@ -1,0 +1,22 @@
+Match id
+Players
+	Player slot
+	Hero_ID
+	Kills	{
+	Deaths		Compute KDA ratio
+	Assists	}
+	leaver_status = 0 or 1
+	last_hits	{ Creep score
+	denies		}
+	gold_per_min
+	xp_per_min
+season (for organizing time component?)
+radiant_win (which side is preferred)
+duration
+match_id
+cluster
+first_blood_time
+lobby_type = 2,7, maybe 5 and 6
+leagueid
+game_mode = 22
+picks_bans
