@@ -14,14 +14,26 @@ if($conn){
 //Get the data from the API
 $key='713000CA799F87C7B69F32DB26591D94';
 //$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=".$key;
-$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?league_id=5157&matches_requested=300&key=".$key;
-$matches = file_get_contents($url);
-$matches = json_decode($matches);
+
+$HistoryFlag = true;
 $match_id = array();
-
-
-for ($i=0; $i< sizeof($matches->result->matches); $i++) {
-	array_push($match_id, $matches->result->matches[$i]->match_id);
+$last_match_id = "";
+while($HistoryFlag)
+{
+	$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?league_id=5157&matches_requested=300&start_at_match_id=".$last_match_id."&key=".$key;
+	$matches = file_get_contents($url);
+	$matches = json_decode($matches);
+	
+	for ($i=0; $i< sizeof($matches->result->matches); $i++) 
+	{
+		array_push($match_id, $matches->result->matches[$i]->match_id);
+	}
+	$last_match_id = end($match_id);
+	if($matches->result->results_remaining == 0)
+	{
+		$HistoryFlag = false;
+		var_dump("Ayyy");
+	}
 }
 
 $match_details = array();
