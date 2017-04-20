@@ -13,7 +13,7 @@ if($conn){
 
 //Get the data from the API
 $key='713000CA799F87C7B69F32DB26591D94';
-$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=".$key;
+$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?game_mode=22&min_players=10&key=".$key;
 $matches = file_get_contents($url);
 $matches = json_decode($matches);
 $match_id = array();
@@ -21,6 +21,8 @@ $match_id = array();
 for ($i=0; $i< sizeof($matches->result->matches); $i++) {
 	array_push($match_id, $matches->result->matches[$i]->match_id);
 }
+
+var_dump(sizeof($match_id));
 
 $match_details = array();
 for ($i=0; $i<sizeof($match_id); $i++) {
@@ -34,8 +36,10 @@ for ($i=0; $i<sizeof($match_details); $i++)
 	$json = json_decode($match_details[$i]);
 	if($json->result->game_mode == 22)
 	{
+		//var_dump("game mode good");
 		if($json->result->lobby_type == 2 || $json->result->lobby_type == 7 || $json->result->lobby_type == 5 || $json->result->lobby_type == 6)
 		{
+			//var_dump("lobby type good");
 			$flag = true;
 			for ($j = 0; $j < sizeof($json->result->players); $j++)
 			{
@@ -46,6 +50,7 @@ for ($i=0; $i<sizeof($match_details); $i++)
 			}
 			if($flag)
 			{				
+				//var_dump("leaver_status good");
 				$player_slot = array();
 				$hero_id = array();
 				$kills = array();
@@ -58,9 +63,9 @@ for ($i=0; $i<sizeof($match_details); $i++)
 				$gold_per_min = array();
 				$xp_per_min = array();
 				
-				$querystatement = 'INSERT INTO \"PublicMatches\" (match_id, player_slot, hero_id, kills, deaths, assists, kd_ratio, leaver_status, last_hits, denies, gold_per_min, xp_per_min, radiant_win, duration, cluster, first_blood_time, lobby_type, leagueid, game_mode'
-								+ ' VALUES ('
-								+ $json->result->match_id + ',';
+				$querystatement = 'INSERT INTO "PublicMatches" (match_id, player_slot, hero_id, start_time, kills, deaths, assists, kd_ratio, leaver_status, last_hits, denies, gold_per_min, xp_per_min, radiant_win, duration, cluster, first_blood_time, lobby_type, leagueid, game_mode)'
+								. ' VALUES ('
+								. $json->result->match_id . ',';
 								
 				//Create arrays containing player specific data
 				for ($k = 0; $k < sizeof($json->result->players); $k++)
@@ -80,6 +85,7 @@ for ($i=0; $i<sizeof($match_details); $i++)
 					array_push($kd_ratio, $temp_kd);
 					array_push($leaver_status, $json->result->players[$k]->leaver_status);
 					array_push($last_hits, $json->result->players[$k]->last_hits);
+					array_push($denies, $json->result->players[$k]->denies);
 					array_push($gold_per_min, $json->result->players[$k]->gold_per_min);
 					array_push($xp_per_min, $json->result->players[$k]->xp_per_min);
 				}
@@ -92,30 +98,32 @@ for ($i=0; $i<sizeof($match_details); $i++)
 				$kd_ratio_implode = implode(",", $kd_ratio);
 				$leaver_status_implode = implode(",", $leaver_status);
 				$last_hits_implode = implode(",", $last_hits);
+				$denies_implode = implode(",", $denies);
 				$gold_per_min_implode = implode(",", $gold_per_min);
 				$xp_per_min_implode = implode(",", $xp_per_min);
+				$converted_rad_win = ($json->result->radiant_win) ? 'true' : 'false';
 				
 				$querystatement = $querystatement
-								+  '[' + $player_slot_implode + ']' + ','
-								+  '[' + $hero_id_implode + ']' + ','
-								+  '[' + $kills_implode + ']' + ','
-								+  '[' + $deaths_implode + ']' + ','
-								+  '[' + $assists_implode + ']' + ','
-								+  '[' + $kd_ratio_implode + ']' + ','
-								+  '[' + $leaver_status_implode + ']' + ','
-								+  '[' + $last_hits_implode + ']' + ','
-								+  '[' + $gold_per_min_implode + ']' + ','
-								+  '[' + $xp_per_min_implode + ']' + ','
-								+  $json->result->radiant_win + ','
-								+  $json->result->duration + ','
-								+  $json->result->cluster + ','
-								+  $json->result->first_blood_time + ','
-								+  $json->result->lobby_type + ','
-								+  $json->result->leagueid + ','
-								+  $json->result->game_mode + ',' + ')';
+								.  '\'{' . $player_slot_implode   . '}\'' . ','
+								.  '\'{' . $hero_id_implode       . '}\'' . ','
+								.  $json->result->start_time      . ',' 
+								.  '\'{' . $kills_implode         . '}\'' . ','
+								.  '\'{' . $deaths_implode        . '}\'' . ','
+								.  '\'{' . $assists_implode       . '}\'' . ','
+								.  '\'{' . $kd_ratio_implode      . '}\'' . ','
+								.  '\'{' . $leaver_status_implode . '}\'' . ','
+								.  '\'{' . $last_hits_implode     . '}\'' . ','
+								.  '\'{' . $denies_implode        . '}\'' . ','
+								.  '\'{' . $gold_per_min_implode  . '}\'' . ','
+								.  '\'{' . $xp_per_min_implode    . '}\'' . ','
+								.  $converted_rad_win . ','
+								.  $json->result->duration . ','
+								.  $json->result->cluster . ','
+								.  $json->result->first_blood_time . ','
+								.  $json->result->lobby_type . ','
+								.  $json->result->leagueid . ','
+								.  $json->result->game_mode . ')';
 				$query = $conn->query($querystatement);
-				var_dump($query);
-				//var_dump($query);
 				
 			}
 		}
@@ -125,5 +133,5 @@ for ($i=0; $i<sizeof($match_details); $i++)
 }
 }catch (PDOException $e){
 // report error message
-echo $e->getMessage();
+var_dump($e->getMessage());
 } ?>
