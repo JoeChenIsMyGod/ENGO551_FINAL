@@ -22,8 +22,6 @@ for ($i=0; $i< sizeof($matches->result->matches); $i++) {
 	array_push($match_id, $matches->result->matches[$i]->match_id);
 }
 
-var_dump(sizeof($match_id));
-
 $match_details = array();
 for ($i=0; $i<sizeof($match_id); $i++) {
 	$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=".$match_id[$i]."&key=".$key;
