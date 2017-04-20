@@ -121,10 +121,7 @@ for ($i=0; $i<sizeof($match_details); $i++)
 								.  $json->result->lobby_type . ','
 								.  $json->result->leagueid . ','
 								.  $json->result->game_mode . ')';
-				var_dump($querystatement);
 				$query = $conn->query($querystatement);
-				var_dump($query);
-				//var_dump($query);
 				
 			}
 		}
@@ -134,5 +131,5 @@ for ($i=0; $i<sizeof($match_details); $i++)
 }
 }catch (PDOException $e){
 // report error message
-var_dump($e->getMessage());
+echo($e->getMessage());
 } ?>
