@@ -53,17 +53,17 @@
 		{location = ["US East", 39.180047, -78.718597];}
 		else if(cluster == 131 || cluster == 132 || cluster == 133 || cluster == 134 || cluster == 135 || cluster == 136 || cluster == 137 || cluster == 138)
 		{location = ["Europe West", 48.181756, 4.941245];}
-		else if(cluster == 142 || cluster == 143 || cluster == 144)
+		else if(cluster == 142 || cluster == 143 || cluster == 144 || cluster == 145)
 		{location = ["South Korea", 36.621251, 127.768640];}
 		else if(cluster == 151 || cluster == 152 || cluster == 153 || cluster == 154 || cluster == 155 || cluster == 156 || cluster == 161)
 		{location = ["Southeast Asia", 14.602808, 120.976372];}
-		else if(cluster == 171)
+		else if(cluster == 171 || cluster == 172)
 		{location = ["Australia", -27.605192, 132.983227];}
 		else if(cluster == 181 || cluster == 182 || cluster == 183 || cluster == 184 || cluster == 185 || cluster == 186 || cluster == 187 || cluster == 188)
 		{location = ["Russia", 62.711126, 88.242136];}
 		else if(cluster == 191 || cluster == 192 || cluster == 193)
 		{location = ["Europe East", 50.939375, 26.423239];}
-		else if(cluster == 200 || cluster == 202 || cluster == 204)
+		else if(cluster == 200 || cluster == 201 || cluster == 202 || cluster == 204)
 		{location = ["South America", -9.606603, -60.258802];}
 		else if(cluster == 211 || cluster == 212 || cluster == 213)
 		{location = ["South Africa", -29.208934, 24.661549];}
@@ -81,7 +81,7 @@
 	function GetMatchDetails(){
 	$.ajax({
 			type: 'post',
-			url: 'dota2map.php',
+			url: 'api2database.php',
 			data: {},
 			success: function(response) {
 				var matchdetails = JSON.parse(response);
@@ -95,7 +95,7 @@
 	});
 	};
 	
-	setInterval(GetMatchDetails, 5000);
+	setInterval(GetMatchDetails, 600000);
 		
 
 </script>
