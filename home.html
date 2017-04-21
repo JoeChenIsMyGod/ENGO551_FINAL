@@ -41,9 +41,83 @@
 	}).addTo(map);
 
 
-	// control that shows state info on hover
+	// control that shows region stats on click
 	var info = L.control();
+	info.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		return this._div;
+	};
+	info.update = function (feature) {
+		this._div.innerHTML = '<h4>Statistics: '+ feature.properties.name + '</h4>';
+		var clusters = feature.properties.clusters;
+		$.ajax({
+			type: 'post',
+			url: 'herofrequency.php',
+			data: {clusters},
+			success: function(response) {
+			
+			}
+	});
+	};
+	
+	info.addTo(map);
+	
 	var marker = [];
+
+	var CountriesGeoJSON;
+	
+	function getColor() {
+		return '#d1d1d1';
+	}
+	
+	function CountryStyle(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '1',
+			fillOpacity: 0.7,
+			fillColor: getColor()
+		};
+	}
+	
+	function highlightFeature(e) {
+		var layer = e.target;
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+	}
+	
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+		//var name = e.target.feature.properties.NAME;
+	}
+	
+	function resetHighlight(e) {
+		e.target.setStyle(CountryStyle(e));
+	}
+
+	function clickfunction(e) {
+		zoomToFeature(e);
+		info.update(e.target.feature);
+	}
+	
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: clickfunction
+		});
+	}
+
 	
 	function GetClusterLocation(cluster){
 		var location = [];
@@ -84,20 +158,23 @@
 			url: 'api2database.php',
 			data: {},
 			success: function(response) {
-				var matchdetails = JSON.parse(response);
-				for (var i = 0; i < matchdetails.length; i++)
-				{
-					var match = JSON.parse(matchdetails[i])
-					var location = GetClusterLocation(match.result.cluster);
-					map.addLayer(L.marker([location[1], location[2]])); 
-				}
+				
 			}
 	});
 	};
 	
 	setInterval(GetMatchDetails, 600000);
-		
-
+	
+	//Add geojson file
+	CountriesGeoJSON = 'countries.geojson';
+	$.getJSON(CountriesGeoJSON,function(data){
+        L.geoJson(data, {
+            clickable: true,
+            style: CountryStyle,
+			onEachFeature: onEachFeature
+        }).addTo(map);
+    })
+	
 </script>
 
 </body>
