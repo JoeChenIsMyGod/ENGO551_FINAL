@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sample WordCloud</title>
+</head>
+<body>
+
+<div style="height:720px;width:540px;">
+<canvas id="test" width="720" height="480" style="border:1px solid #000000;"></canvas>
+</div>
+
+<script src="wordcloud2.js"></script>
+<script>
+var myCloud = [["one", 1],["two", 2],["three",3],["four",4],["five",5],["six",6],["seven",7],["eight",8],["nine",9],["ten",10]];
+WordCloud(document.getElementById("test"), {list: myCloud, weightFactor: 10, minRotation: -1.57,maxRotation: 1.57, rotationSteps: 2});
+</script>
+</body>
+</html>
