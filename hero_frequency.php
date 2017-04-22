@@ -19,14 +19,19 @@ $dsn =
 try{
 // create a PostgreSQL database connection
 $conn = new PDO($dsn);
-// display a message if connected to the PostgreSQL successfully
 	if($conn){
-		// $clustermin = $_POST["clust_min"];
-		// $clustermax = $_POST["clust_max"];
+		$clusters = $_POST["clusters"];
+		$leagueid = $_POST["leagueid"];
+		$queryEnd = '';
 		
-		$clustermin = '151';
-		$clustermax = '161';
-		$queryStatement = 'SELECT hero_id FROM "ProfessionalMatches" WHERE cluster BETWEEN \''.$clustermin.'\' AND \''.$clustermax.'\'';
+		for($i=0; $i<sizeof($clusters)-1; $i++) {
+			$queryEnd = $queryEnd . 'cluster =\''.$clusters[$i].'\' OR ';
+		}
+		$queryEnd = $queryEnd . 'cluster =\''.end($clusters).'\'';
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		//GET MOST PICKED HEROES IN EACH CLUSTER RANGE
+		$queryStatement = 'SELECT hero_id FROM "ProfessionalMatches" WHERE leagueid = \''.$leagueid.'\' AND '.$queryEnd;
 		$query = $conn->query($queryStatement);
 		$results = $query->fetchAll(PDO::FETCH_OBJ);
 		
@@ -72,7 +77,7 @@ $conn = new PDO($dsn);
 		
 		$hero_pictures = array();
 		
-		for ($i=0; $i<9; $i++) {
+		for ($i=0; $i<10; $i++) {
 			$id = searcharray($indexes[$i]+1,'id',$hero_list);
 			$image = 'http://cdn.dota2.com/apps/dota2/images/heroes/'.$hero_list[$id]['name'].'_sb.png';
 			$imagedata = base64_encode(file_get_contents($image));
@@ -84,9 +89,10 @@ $conn = new PDO($dsn);
 			array_push($hero_pictures, '<img src="data:image/png;base64,'.$imagedata.'">');
 		}
 		
-		$json = json_encode($hero_pictures);
+		$hero_pic_json = json_encode($hero_pictures);
+		//RETURN HERO PICTURES
+		echo $hero_pic_json;
 		
-		echo $json;
 	}
 }catch (PDOException $e){
 // report error message
