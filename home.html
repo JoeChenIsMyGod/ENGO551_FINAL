@@ -131,17 +131,7 @@
 			}
 		});
 		
-		$.ajax({
-			type: 'post',
-			url: 'globalkills_per_min.php',
-			data: {leagueid},
-			success: function(response) {
-			$("#responsecontainer4").html('');
-				global_average = JSON.parse(response);
-				$("#responsecontainer4").html('<b>Global Average Kills per Min: </b>' + global_average);
-				
-			}
-		});
+		
 		
 		$.ajax({
 			type: 'post',
@@ -189,8 +179,61 @@
 	var marker = [];
 	var CountriesGeoJSON;
 	
-	function getColor() {
-		return '#d1d1d1';
+	function getColor(feature, leagueid, globalave) {
+		var colour = '#d1d1d1';
+		var clusters = feature.properties.clusters;
+		$.ajax({
+			type: 'post',
+			url: 'kills_per_min.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+				if (response == 'ERROR')
+				{
+					//alert(response);
+				}
+				else
+				{
+					var average = JSON.parse(response);
+					var difference;
+					//Blue
+					if (average < globalave)
+					{
+						difference = (globalave - average) / (globalave) * 100;
+						if (difference > 5){colour = '#002770'}
+						else if (difference > 4){colour = '#0045c4'}
+						else if (difference > 3){colour = '#005aff'}
+						else if (difference > 2){colour = '#5994ff'}
+						else if (difference > 1){colour = '#a3c4ff'}
+						else if (difference > 0){colour = '#d6e5ff'}
+						else {colour = '#d1d1d2'};
+					}
+					//Red
+					else
+					{
+						difference = (average - globalave) / (globalave) * 100;
+						colour = '#d1d1d1';
+					}
+					
+				}
+				
+			}
+		});
+		//alert(colour);
+		return colour;
+	}
+	
+	function CalcKills(feature, leagueid) {
+		$.ajax({
+			type: 'post',
+			url: 'globalkills_per_min.php',
+			data: {leagueid},
+			success: function(response) {
+			$("#responsecontainer4").html('');
+				global_average = JSON.parse(response);
+				$("#responsecontainer4").html('<b>Global Average Kills per Min: </b>' + global_average);
+				
+			}
+		});
 	}
 	
 	function CountryStyle(feature) {
@@ -200,7 +243,7 @@
 			color: 'white',
 			dashArray: '1',
 			fillOpacity: 0.7,
-			fillColor: getColor()
+			fillColor: '#d1d1d1'
 		};
 	}
 	
@@ -239,6 +282,8 @@
 			mouseout: resetHighlight,
 			click: clickfunction
 		});
+		CalcKills(feature, 5157);
+		getColor(feature, 5157, 1.16);
 	}
 
 //Ajax call to DOTA2APICall.php to get match data and then display to the map		
@@ -248,7 +293,6 @@
 			url: 'api2database.php',
 			data: {},
 			success: function(response) {
-				
 			}
 	});
 	};
@@ -260,12 +304,10 @@
 	$.getJSON(CountriesGeoJSON,function(data){
         L.geoJson(data, {
             clickable: true,
-            style: CountryStyle,
+			style: CountryStyle,
 			onEachFeature: onEachFeature
         }).addTo(map);
     })
-	
-	var TournamentsJSON = { "tournaments": [ {"name":"Kiev 2017", "time":20170427}, {"name":"Boston 2016", "time":20161207} ] };
 	
 </script>
 
