@@ -60,7 +60,7 @@
 		id: 'mapbox.dark'
 	}).addTo(map);
 
-
+	
 	// control that shows region stats on click
 	var info = L.control();
 	info.onAdd = function (map) {
@@ -68,24 +68,28 @@
 		this._div.innerHTML = '<h4 id="headercontainer"></h4>'
 								+ '<p id="responsecontainer"></p>' 
 								+ '<p id="responsecontainer2"></p>'
-								+ '<p id="responsecontainer3"></p>';
+								+ '<p id="responsecontainer3"></p>'
+								+ '<p id="responsecontainer4"></p>'
+								+ '<p id="responsecontainer5"></p>';
 		return this._div;
 	};
 	info.update = function (feature) {
 		var headertext = 'Region: ' + feature.properties.name;
 		$("#headercontainer").html(headertext);
-		var test;
+		var global_average = '';
 		var clusters = feature.properties.clusters;
+		var leagueid = '5157';
 		$.ajax({
 			type: 'post',
 			url: 'hero_frequency.php',
-			data: {clusters},
+			data: {clusters, leagueid},
 			success: function(response) {
-				
+				$("#responsecontainer").html('');
 				var array = JSON.parse(response);
-				
-				$("#responsecontainer").html('test');
-				
+				document.getElementById("responsecontainer").innerHTML = "Top 10 Picked Heroes" + "<br>";
+				for (i=1; i< array.length; i=i+2) {
+					document.getElementById("responsecontainer").innerHTML += array[i-1] + " " + array[i] + "<br>";
+				}
 			}
 		});
 		
@@ -94,6 +98,7 @@
 			url: 'duration.php',
 			data: {clusters},
 			success: function(response) {
+			$("#responsecontainer2").html('');
 				var duration = JSON.parse(response);
 				$("#responsecontainer2").html('Average Game Duration: ' + duration);
 				
@@ -105,9 +110,33 @@
 			url: 'first_blood.php',
 			data: {clusters},
 			success: function(response) {
+			$("#responsecontainer3").html('');
 				var first_blood = JSON.parse(response);
 				$("#responsecontainer3").html('Average First Blood Time: ' + first_blood);
 				
+			}
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'globalkills_per_min.php',
+			data: {leagueid},
+			success: function(response) {
+			$("#responsecontainer4").html('');
+				global_average = JSON.parse(response);
+				$("#responsecontainer4").html('Global Average Kills per Min: ' + global_average);
+				
+			}
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'kills_per_min.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+				$("#responsecontainer5").html('');
+				var average = JSON.parse(response);
+				$("#responsecontainer5").html('Average Kills per Min: ' + average);
 			}
 		});
 	};
