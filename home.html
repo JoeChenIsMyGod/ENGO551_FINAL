@@ -56,7 +56,7 @@
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			'Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
 		id: 'mapbox.dark'
 	}).addTo(map);
 
@@ -65,19 +65,51 @@
 	var info = L.control();
 	info.onAdd = function (map) {
 		this._div = L.DomUtil.create('div', 'info');
+		this._div.innerHTML = '<h4 id="headercontainer"></h4>'
+								+ '<p id="responsecontainer"></p>' 
+								+ '<p id="responsecontainer2"></p>'
+								+ '<p id="responsecontainer3"></p>';
 		return this._div;
 	};
 	info.update = function (feature) {
-		this._div.innerHTML = '<h4>Statistics: '+ feature.properties.name + '</h4>';
+		var headertext = 'Region: ' + feature.properties.name;
+		$("#headercontainer").html(headertext);
+		var test;
 		var clusters = feature.properties.clusters;
 		$.ajax({
 			type: 'post',
-			url: 'herofrequency.php',
+			url: 'hero_frequency.php',
 			data: {clusters},
 			success: function(response) {
-			
+				
+				var array = JSON.parse(response);
+				
+				$("#responsecontainer").html('test');
+				
 			}
-	});
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'duration.php',
+			data: {clusters},
+			success: function(response) {
+				var duration = JSON.parse(response);
+				$("#responsecontainer2").html('Average Game Duration: ' + duration);
+				
+			}
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'first_blood.php',
+			data: {clusters},
+			success: function(response) {
+				var first_blood = JSON.parse(response);
+				$("#responsecontainer3").html('Average First Blood Time: ' + first_blood);
+				
+			}
+		});
 	};
 	
 	info.addTo(map);
