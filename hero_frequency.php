@@ -19,14 +19,21 @@ $dsn =
 try{
 // create a PostgreSQL database connection
 $conn = new PDO($dsn);
-// display a message if connected to the PostgreSQL successfully
 	if($conn){
-		// $clustermin = $_POST["clust_min"];
-		// $clustermax = $_POST["clust_max"];
+		$clusters = $_POST["clusters"];
 		
-		$clustermin = '151';
-		$clustermax = '161';
-		$queryStatement = 'SELECT hero_id FROM "ProfessionalMatches" WHERE cluster BETWEEN \''.$clustermin.'\' AND \''.$clustermax.'\'';
+		$clustermin = '221';
+		$clustermax = '241';
+		$queryEnd = 'WHERE ';
+		
+		for($i=0; $i<sizeof($clusters)-1; $i++) {
+			$queryEnd = $queryEnd . 'cluster =\''.$clusters[$i].'\' OR ';
+		}
+		$queryEnd = $queryEnd . 'cluster =\''.end($clusters).'\'';
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		//GET MOST PICKED HEROES IN EACH CLUSTER RANGE
+		$queryStatement = 'SELECT hero_id FROM "ProfessionalMatches" '.$queryEnd;
 		$query = $conn->query($queryStatement);
 		$results = $query->fetchAll(PDO::FETCH_OBJ);
 		
@@ -84,9 +91,25 @@ $conn = new PDO($dsn);
 			array_push($hero_pictures, '<img src="data:image/png;base64,'.$imagedata.'">');
 		}
 		
-		$json = json_encode($hero_pictures);
+		$hero_pic_json = json_encode($hero_pictures);
+		//RETURN HERO PICTURES
+		echo $hero_pic_json;
 		
-		echo $json;
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////////////
+		//GET AVERAGE NUMBER OF KILLS IN EACH CLUSTER RANGE
+		$queryStatement4 = 'SELECT kills FROM "ProfessionalMatches" WHERE cluster BETWEEN \''.$clustermin.'\' AND \''.$clustermax.'\'';
+		$query4 = $conn->query($queryStatement4);
+		$results4 = $query4->fetchAll(PDO::FETCH_OBJ);
+		
+		// $kills = json_decode(json_encode(($results4)),true);
+				
+		// for ($i=0; $i< sizeof($hero_picks); $i++) {
+			// $temp = str_replace("{", "", $hero_picks[$i]['hero_id']);
+			// $temp2 = str_replace("}", "", $temp);
+			// $hero_picks[$i]['hero_id'] = explode(',', $temp2);
+		// }
+		
 	}
 }catch (PDOException $e){
 // report error message
