@@ -9,8 +9,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
-
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+	
+	<link rel="stylesheet" href="leaflet.css" />
+	<link rel="stylesheet" href="bootstrap-slider.css" />
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
 
 	<style>
@@ -20,13 +21,18 @@
 			position: absolute;
 			margin-left: -8px;
 			margin-top: -8px;
+			display: block;
 		}
 
 		.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
 		.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+		
+		#title {
+			color: white;
+			margin: auto;
+			text-align: center;
+		}
 
-	</style>
-	<style>
 		.btnStyle {
 			cursor:pointer;
 			background-color: #4D90FE; 
@@ -39,27 +45,35 @@
 			margin-bottom: 4px;
 			width:100%
 		}
+		#ex1Slider .slider-selection {
+			background: #BABABA;
+		}
+		
 	</style>
 </head>
 <body>
 
 <div id='map'>
+	<div class="leaflet-top">
+		<H1 id = 'title'>DOTAMAP V1.0</H1>
+	</div>
 	<div class="leaflet-bottom">
-            <input type="button" id="Btn1" value="Kiev" onclick="SaveRoutes()" class="btnStyle span3 leaflet-control" />
-            <input type="button" id="Btn2" value="Other Major" onclick="SaveRoutes()" class="btnStyle span3 leaflet-control" /> 
 	</div>
 </div>
-
+<script type="text/javascript"  src="bootstrap-slider.js"></script>
 <script type="text/javascript">
-	var map = L.map('map').setView([30,0], 2);
+	var map = L.map('map', { zoomControl: false }).setView([30,0], 2);
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		id: 'mapbox.dark'
 	}).addTo(map);
 
+	L.control.zoom({
+     position:'bottomright'
+	}).addTo(map);
 	
 	// control that shows region stats on click
 	var info = L.control();
@@ -143,8 +157,36 @@
 	
 	info.addTo(map);
 	
-	var marker = [];
+	var slider = L.control({position: "bottomleft"});
+	slider.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'slider');
+		this._div.innerHTML = '<input id="timeslide" data-slider-id=\'ex1Slider\' type="text" data-slider-ticks="[1, 2]" />';
+		return this._div;
+	};
+	slider.addTo(map);
+	
+	// Disable dragging when user's cursor enters the element
+    slider.getContainer().addEventListener('mouseover', function () {
+        map.dragging.disable();
+    });
 
+    // Re-enable dragging when user's cursor leaves the element
+    slider.getContainer().addEventListener('mouseout', function () {
+        map.dragging.enable();
+    });
+	
+	$("#timeslide").slider({
+		ticks: [1, 2],
+		ticks_labels: ['Boston 2016', 'Kiev 2017'],
+		ticks_snap_bounds: 30,
+		tooltip_position: 'bottom'
+	});
+	
+	$("#timeslide").on("slide", function(slideEvt) {
+		$("#headercontainer").html(slideEvt.value);
+	});
+	
+	var marker = [];
 	var CountriesGeoJSON;
 	
 	function getColor() {
@@ -199,40 +241,7 @@
 		});
 	}
 
-	
-	function GetClusterLocation(cluster){
-		var location = [];
-		if(cluster == 111 || cluster == 112 || cluster == 114)
-		{location = ["US West", 41.656640, -116.273541];}
-		else if(cluster == 121 || cluster == 122 || cluster == 123 || cluster == 124)
-		{location = ["US East", 39.180047, -78.718597];}
-		else if(cluster == 131 || cluster == 132 || cluster == 133 || cluster == 134 || cluster == 135 || cluster == 136 || cluster == 137 || cluster == 138)
-		{location = ["Europe West", 48.181756, 4.941245];}
-		else if(cluster == 142 || cluster == 143 || cluster == 144 || cluster == 145)
-		{location = ["South Korea", 36.621251, 127.768640];}
-		else if(cluster == 151 || cluster == 152 || cluster == 153 || cluster == 154 || cluster == 155 || cluster == 156 || cluster == 161)
-		{location = ["Southeast Asia", 14.602808, 120.976372];}
-		else if(cluster == 171 || cluster == 172)
-		{location = ["Australia", -27.605192, 132.983227];}
-		else if(cluster == 181 || cluster == 182 || cluster == 183 || cluster == 184 || cluster == 185 || cluster == 186 || cluster == 187 || cluster == 188)
-		{location = ["Russia", 62.711126, 88.242136];}
-		else if(cluster == 191 || cluster == 192 || cluster == 193)
-		{location = ["Europe East", 50.939375, 26.423239];}
-		else if(cluster == 200 || cluster == 201 || cluster == 202 || cluster == 204)
-		{location = ["South America", -9.606603, -60.258802];}
-		else if(cluster == 211 || cluster == 212 || cluster == 213)
-		{location = ["South Africa", -29.208934, 24.661549];}
-		else if(cluster == 221 || cluster == 222 || cluster == 223 || cluster == 224 || cluster == 227 || cluster == 231 || cluster == 232 || cluster == 241 || cluster == 251 || cluster == 261)
-		{location = ["China", 34.227923, 113.391262];}
-		else
-		{location = ["INVALID: " + cluster, 0, 0]; 
-			alert(location);}
-		
-		return location;
-	}
-
-//Ajax call to DOTA2APICall.php to get match data and then display to the map	
-	
+//Ajax call to DOTA2APICall.php to get match data and then display to the map		
 	function GetMatchDetails(){
 	$.ajax({
 			type: 'post',
@@ -243,8 +252,8 @@
 			}
 	});
 	};
-	
 	setInterval(GetMatchDetails, 600000);
+	
 	
 	//Add geojson file
 	CountriesGeoJSON = 'countries.geojson';
@@ -255,6 +264,8 @@
 			onEachFeature: onEachFeature
         }).addTo(map);
     })
+	
+	var TournamentsJSON = { "tournaments": [ {"name":"Kiev 2017", "time":20170427}, {"name":"Boston 2016", "time":20161207} ] };
 	
 </script>
 
