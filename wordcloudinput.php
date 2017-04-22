@@ -14,6 +14,7 @@ $region = $_GET("region");
 $meme = $_GET("meme");
 $role = $_GET("role");
 $hero = $_GET("hero");
+//combine role+hero
 $meta = $_GET("meta");
 //user tags, can be empty
 }?>
