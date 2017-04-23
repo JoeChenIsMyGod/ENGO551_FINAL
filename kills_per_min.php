@@ -47,10 +47,18 @@ $conn = new PDO($dsn);
 			$kills_per_min += $sum_kills/$temp_duration;
 		}
 		
-		$average = $kills_per_min/sizeof($kills);
-		$average = number_format((float)$average, 2, '.', '');
-		$average_json = json_encode($average);
-		echo $average_json;
+		$error = "ERROR";
+		if(sizeof($kills) == 0)
+		{
+			echo $error;
+		}
+		else
+		{
+			$average = $kills_per_min/sizeof($kills);
+			$average = number_format((float)$average, 2, '.', '');
+			$average_json = json_encode($average);
+			echo $average_json;
+		}
 		
 		
 		}

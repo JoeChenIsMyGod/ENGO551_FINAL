@@ -54,7 +54,6 @@
 <body>
 
 <div id='map'>
-	
 </div>
 
 <script type="text/javascript" src="CountriesGeoJSON.js"></script>
@@ -68,7 +67,7 @@
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		id: 'mapbox.dark'
 	}).addTo(map);
 
@@ -148,7 +147,7 @@
 	var slider = L.control({position: "bottomleft"});
 	slider.onAdd = function (map) {
 		this._div = L.DomUtil.create('div', 'slider');
-		this._div.innerHTML = '<input id="timeslide" data-slider-id=\'ex1Slider\' type="text" data-slider-ticks="[1, 2]" />';
+		this._div.innerHTML = '<input id="timeslide" data-slider-id=\'ex1Slider\' type="text" data-slider-ticks="[1, 2, 3, 4]" />';
 		return this._div;
 	};
 	slider.addTo(map);
@@ -164,23 +163,30 @@
     });
 	
 	$("#timeslide").slider({
-		ticks: [1, 2],
-		ticks_labels: ['Boston 2016', 'Kiev 2017'],
+		ticks: [1, 2, 3, 4],
+		ticks_labels: ['Man 2016', 'Int 2016','Bos 2016', 'Kiev 2017'],
 		ticks_snap_bounds: 30,
 		tooltip_position: 'bottom'
 	});
 	
-	$("#timeslide").on("slide", function(slideEvt) {
+	$("#timeslide").on("slideStop", function(slideEvt) {
+		
 		if(slideEvt.value == 1){
+			leagueid = 4479;
+		}
+		if(slideEvt.value == 2){
+			leagueid = 4664;
+		}
+		else if(slideEvt.value == 3){
 			leagueid = 4874;
 		}
-		else if(slideEvt.value == 2){
+		else if(slideEvt.value == 4){
 			leagueid = 5157;
 		}
+		globalkillsaverage = CalcKills(leagueid);
 		geojson.eachLayer( function (layer) {
 			//info.update(layer.feature, leagueid);
 			//alert(layer.feature.properties.name);
-			globalkillsaverage = CalcKills(leagueid);
 			layer.setStyle({fillColor: getColor(layer.feature, leagueid, globalkillsaverage)});
 		});
 	});
@@ -214,7 +220,7 @@
 						else if (difference > 3){colour = '#005aff'}
 						else if (difference > 2){colour = '#5994ff'}
 						else if (difference > 1){colour = '#a3c4ff'}
-						else if (difference > 0){colour = '#d6e5ff'}
+						else if (difference > 0){colour = '#c6dbff'}
 						else {colour = '#d1d1d1'};
 					}
 					//Red
@@ -301,6 +307,18 @@
 		layer.setStyle({fillColor: getColor(feature, leagueid, globalkillsaverage)});
 	}
 
+//Ajax call to DOTA2APICall.php to get match data and then display to the map		
+	function GetMatchDetails(){
+	$.ajax({
+			type: 'post',
+			url: 'api2database.php',
+			data: {},
+			success: function(response) {
+			}
+	});
+	};
+	setInterval(GetMatchDetails, 600000);
+	
 	var legend = L.control({position: 'topleft'});
 	legend.onAdd = function (feature) {
 
@@ -326,18 +344,6 @@
 	};
 
 	legend.addTo(map);
-	
-//Ajax call to DOTA2APICall.php to get match data and then display to the map		
-	function GetMatchDetails(){
-	$.ajax({
-			type: 'post',
-			url: 'api2database.php',
-			data: {},
-			success: function(response) {
-			}
-	});
-	};
-	setInterval(GetMatchDetails, 600000);
 	
 	//Add geojson file
 	geojson = L.geoJson(CountriesGeoJSON, {

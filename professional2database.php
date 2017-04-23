@@ -20,7 +20,7 @@ $match_id = array();
 $last_match_id = "";
 while($HistoryFlag)
 {
-	$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?league_id=5157&matches_requested=300&start_at_match_id=".$last_match_id."&key=".$key;
+	$url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?league_id=4479&matches_requested=300&start_at_match_id=".$last_match_id."&key=".$key;
 	$matches = file_get_contents($url);
 	$matches = json_decode($matches);
 	
@@ -32,7 +32,6 @@ while($HistoryFlag)
 	if($matches->result->results_remaining == 0)
 	{
 		$HistoryFlag = false;
-		var_dump("Ayyy");
 	}
 }
 
