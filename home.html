@@ -57,8 +57,6 @@
 	<div class="leaflet-top">
 		<H1 id = 'title'>DOTAMAP V1.0</H1>
 	</div>
-	<div class="leaflet-bottom">
-	</div>
 </div>
 <script type="text/javascript"  src="bootstrap-slider.js"></script>
 <script type="text/javascript">
@@ -183,6 +181,7 @@
 		var colour = '#d1d1d1';
 		var clusters = feature.properties.clusters;
 		$.ajax({
+			async: false,
 			type: 'post',
 			url: 'kills_per_min.php',
 			data: {clusters, leagueid},
@@ -208,17 +207,22 @@
 						else {colour = '#d1d1d2'};
 					}
 					//Red
-					else
+					else if (average > globalave)
 					{
 						difference = (average - globalave) / (globalave) * 100;
-						colour = '#d1d1d1';
+						if (difference > 5){colour = '#002770'}
+						else if (difference > 4){colour = '#b50000'}
+						else if (difference > 3){colour = '#ff0000'}
+						else if (difference > 2){colour = '#ff2323'}
+						else if (difference > 1){colour = '#ff5656'}
+						else if (difference > 0){colour = '#ff9696'}
+						else {colour = '#d1d1d2'};
 					}
-					
+					//feature.properties.color = colour;
 				}
 				
 			}
 		});
-		//alert(colour);
 		return colour;
 	}
 	
@@ -242,8 +246,7 @@
 			opacity: 1,
 			color: 'white',
 			dashArray: '1',
-			fillOpacity: 0.7,
-			fillColor: '#d1d1d1'
+			fillOpacity: 0.7
 		};
 	}
 	
@@ -282,8 +285,7 @@
 			mouseout: resetHighlight,
 			click: clickfunction
 		});
-		CalcKills(feature, 5157);
-		getColor(feature, 5157, 1.16);
+		layer.setStyle({fillColor: getColor(feature, 5157, 1.16)});
 	}
 
 //Ajax call to DOTA2APICall.php to get match data and then display to the map		
