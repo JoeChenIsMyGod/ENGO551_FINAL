@@ -11,7 +11,8 @@ try{
 $conn = new PDO($dsn);
 	if($conn){
 		$clusters = $_POST["clusters"];
-		$queryEnd = 'WHERE ';
+		$leagueid = $_POST["leagueid"];
+		$queryEnd = '';
 		
 		for($i=0; $i<sizeof($clusters)-1; $i++) {
 			$queryEnd = $queryEnd . 'cluster =\''.$clusters[$i].'\' OR ';
@@ -19,7 +20,7 @@ $conn = new PDO($dsn);
 		$queryEnd = $queryEnd . 'cluster =\''.end($clusters).'\'';
 		
 		//GET AVERAGE MATCH DURATION IN EACH CLUSTER RANGE
-		$queryStatement = 'SELECT duration FROM "ProfessionalMatches" '.$queryEnd;
+		$queryStatement = 'SELECT duration FROM "ProfessionalMatches" WHERE leagueid = \''.$leagueid.'\' AND '.$queryEnd;
 		$query = $conn->query($queryStatement);
 		$results = $query->fetchAll(PDO::FETCH_OBJ);
 
