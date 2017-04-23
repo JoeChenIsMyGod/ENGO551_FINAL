@@ -54,7 +54,7 @@
 <body>
 
 <div id='map'>
-	<div class="leaflet-top">
+	<div class="leaflet-bottom">
 		<H1 id = 'title'>DOTAMAP V1.0</H1>
 	</div>
 </div>
@@ -65,7 +65,7 @@
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			'Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
 		id: 'mapbox.dark'
 	}).addTo(map);
 
@@ -108,7 +108,7 @@
 		$.ajax({
 			type: 'post',
 			url: 'duration.php',
-			data: {clusters},
+			data: {clusters, leagueid},
 			success: function(response) {
 			$("#responsecontainer2").html('');
 				var duration = JSON.parse(response);
@@ -120,7 +120,7 @@
 		$.ajax({
 			type: 'post',
 			url: 'first_blood.php',
-			data: {clusters},
+			data: {clusters, leagueid},
 			success: function(response) {
 			$("#responsecontainer3").html('');
 				var first_blood = JSON.parse(response);
@@ -300,6 +300,32 @@
 	};
 	setInterval(GetMatchDetails, 600000);
 	
+	var legend = L.control({position: 'topleft'});
+	legend.onAdd = function (feature) {
+
+		var div = L.DomUtil.create('div', 'info legend'),
+			grades = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+			colors = ['#002770', '#0045c4', '#005aff', '#5994ff', '#a3c4ff', '#d6e5ff', '#d1d1d1', '#ff9696', '#ff5656', '#ff2323', '#ff0000', '#b50000', '#890000'],
+			labels = [];
+			
+		labels.push(
+			'<i style="background:' + colors[0] + '"></i> ' + 'Passive'
+			);
+
+		for (var i = 1; i < colors.length-1; i++) {
+			labels.push(
+				'<i style="background:' + colors[i] + '"></i> '
+				);
+		}
+		labels.push(
+			'<i style="background:' + colors[12] + '"></i> ' + 'Aggressive'
+			);
+		
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend.addTo(map);
 	
 	//Add geojson file
 	CountriesGeoJSON = 'countries.geojson';
