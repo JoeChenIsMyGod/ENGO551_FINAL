@@ -54,18 +54,24 @@
 <body>
 
 <div id='map'>
-	<div class="leaflet-bottom">
+	<div class="leaflet-top">
 		<H1 id = 'title'>DOTAMAP V1.0</H1>
 	</div>
 </div>
+
+<script type="text/javascript" src="CountriesGeoJSON.js"></script>
 <script type="text/javascript"  src="bootstrap-slider.js"></script>
 <script type="text/javascript">
+	var geojson;
+	var leagueid = 5157;
+	var globalkillsaverage = CalcKills(leagueid);
+	alert(globalkillsaverage);
 	var map = L.map('map', { zoomControl: false }).setView([30,0], 2);
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		id: 'mapbox.dark'
 	}).addTo(map);
 
@@ -85,12 +91,11 @@
 								+ '<p id="responsecontainer5"></p>';
 		return this._div;
 	};
-	info.update = function (feature) {
+	info.update = function (feature, leagueid) {
 		var headertext = 'Region: ' + feature.properties.name;
 		$("#headercontainer").html(headertext);
 		var global_average = '';
 		var clusters = feature.properties.clusters;
-		var leagueid = '5157';
 		$.ajax({
 			type: 'post',
 			url: 'hero_frequency.php',
@@ -128,8 +133,6 @@
 				
 			}
 		});
-		
-		
 		
 		$.ajax({
 			type: 'post',
@@ -171,7 +174,18 @@
 	});
 	
 	$("#timeslide").on("slide", function(slideEvt) {
-		$("#headercontainer").html(slideEvt.value);
+		if(slideEvt.value == 1){
+			leagueid = 4874;
+		}
+		else if(slideEvt.value == 2){
+			leagueid = 5157;
+		}
+		geojson.eachLayer( function (layer) {
+			//info.update(layer.feature, leagueid);
+			//alert(layer.feature.properties.name);
+			globalkillsaverage = CalcKills(leagueid);
+			layer.setStyle({fillColor: getColor(layer.feature, leagueid, globalkillsaverage)});
+		});
 	});
 	
 	var marker = [];
@@ -226,18 +240,20 @@
 		return colour;
 	}
 	
-	function CalcKills(feature, leagueid) {
+	function CalcKills(leagueid) {
+		var global_average = 0;
 		$.ajax({
 			type: 'post',
+			async: false,
 			url: 'globalkills_per_min.php',
 			data: {leagueid},
 			success: function(response) {
 			$("#responsecontainer4").html('');
 				global_average = JSON.parse(response);
 				$("#responsecontainer4").html('<b>Global Average Kills per Min: </b>' + global_average);
-				
 			}
 		});
+		return global_average;
 	}
 	
 	function CountryStyle(feature) {
@@ -276,7 +292,7 @@
 
 	function clickfunction(e) {
 		zoomToFeature(e);
-		info.update(e.target.feature);
+		info.update(e.target.feature, leagueid);
 	}
 	
 	function onEachFeature(feature, layer) {
@@ -285,7 +301,7 @@
 			mouseout: resetHighlight,
 			click: clickfunction
 		});
-		layer.setStyle({fillColor: getColor(feature, 5157, 1.16)});
+		layer.setStyle({fillColor: getColor(feature, leagueid, globalkillsaverage)});
 	}
 
 //Ajax call to DOTA2APICall.php to get match data and then display to the map		
@@ -300,42 +316,12 @@
 	};
 	setInterval(GetMatchDetails, 600000);
 	
-	var legend = L.control({position: 'topleft'});
-	legend.onAdd = function (feature) {
-
-		var div = L.DomUtil.create('div', 'info legend'),
-			grades = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-			colors = ['#002770', '#0045c4', '#005aff', '#5994ff', '#a3c4ff', '#d6e5ff', '#d1d1d1', '#ff9696', '#ff5656', '#ff2323', '#ff0000', '#b50000', '#890000'],
-			labels = [];
-			
-		labels.push(
-			'<i style="background:' + colors[0] + '"></i> ' + 'Passive'
-			);
-
-		for (var i = 1; i < colors.length-1; i++) {
-			labels.push(
-				'<i style="background:' + colors[i] + '"></i> '
-				);
-		}
-		labels.push(
-			'<i style="background:' + colors[12] + '"></i> ' + 'Aggressive'
-			);
-		
-		div.innerHTML = labels.join('<br>');
-		return div;
-	};
-
-	legend.addTo(map);
-	
 	//Add geojson file
-	CountriesGeoJSON = 'countries.geojson';
-	$.getJSON(CountriesGeoJSON,function(data){
-        L.geoJson(data, {
-            clickable: true,
-			style: CountryStyle,
-			onEachFeature: onEachFeature
-        }).addTo(map);
-    })
+	geojson = L.geoJson(CountriesGeoJSON, {
+		clickable: true,
+		style: CountryStyle,
+		onEachFeature: onEachFeature
+	}).addTo(map);
 	
 </script>
 
