@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="jquery-3.1.1.min.js"></script>
+	
+	<title>DOTAMAP</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	
+	<link rel="stylesheet" href="leaflet.css" />
+	<link rel="stylesheet" href="bootstrap-slider.css" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+
+	<style>
+		#map {
+			width: 100%;
+			height: 80%;
+			bottom: 0;
+			position: absolute;
+			margin-left: -8px;
+			margin-top: -8px;
+			display: block;
+		}
+
+		.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+		.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+		
+		#title {
+			color: white;
+			margin: auto;
+			text-align: center;
+		}
+
+		.btnStyle {
+			cursor:pointer;
+			background-color: #4D90FE; 
+			border-radius: 15px;
+			background-image: -moz-linear-gradient(center top , #4D90FE, #4787ED); 
+			border: 1px solid #3079ED; 
+			color: #FFFFFF;
+			padding: 4px;
+			margin-top: 4px;
+			margin-bottom: 4px;
+			width:100%
+		}
+		#ex1Slider .slider-selection {
+			background: #BABABA;
+		}
+		
+	</style>
+</head>
+<body>
+
+<div id='map'>
+</div>
+
+<div id='form'>
+<form action="/wordcloudinput.php" method="get">
+  Select your region :
+  <select name="region">
+	<option value="na">North America</option>
+	<option value="china">China</option>
+	<option value="sea">SEA</option>
+	<option value="cis">CIS</option>
+	<option value="sa">SA</option>
+	<option value="eu">EU</option>
+	</select>
+	<br>
+  Describe your metagame:
+  <br>
+  <input type="text" name="meme"></input>
+  <br>
+  <select name="role">
+	<option value="">Role</option>
+    <option value="carry">Carry</option>
+    <option value="farming">Farming</option>
+    <option value="support">Support</option>
+    <option value="jungle">Jungle</option>
+    <option value="roaming">Roaming</option>
+    <option value="off-lane">Offlane</option>
+    <option value="mid">Mid</option>
+    <option value="split push">Split Push</option>
+    <option value="pushing">Pushing</option>
+  </select>
+  <select name="hero">
+	<option value="">Hero</option>
+	<option value="Abaddon">Abaddon</option>
+	<option value="Alchemist">Alchemist</option>
+	<option value="Ancient Apparition">Ancient Apparition</option>
+  	<option value="Anti-Mage">Anti-Mage</option>
+	<option value="Arc Warden">Arc Warden</option>
+	<option value="Axe">Axe</option>
+	<option value="Bane">Bane</option>
+	<option value="Batrider">Batrider</option>
+	<option value="Beastmaster">Beastmaster</option>
+	<option value="Bloodseeker">Bloodseeker</option>
+	<option value="Bounty Hunter">Bounty Hunter</option>
+	<option value="Brewmaster">Brewmaster</option>
+	<option value="Bristleback">Bristleback</option>
+	<option value="Broodmother">Broodmother</option>
+	<option value="Centaur Warrunner">Centaur Warrunner</option>
+	<option value="Chaos Knight">Chaos Knight</option>
+	<option value="Chen">Chen</option>
+	<option value="Clinkz">Clinkz</option>
+	<option value="Clockwerk">Clockwerk</option>
+	<option value="Crystal Maiden">Crystal Maiden</option>
+	<option value="Dark Seer">Dark Seer</option>
+	<option value="Dazzle">Dazzle</option>
+	<option value="Death Prophet">Death Prophet</option>
+	<option value="Disruptor">Disruptor</option>
+	<option value="Doom">Doom</option>
+	<option value="Dragon Knight">Dragon Knight</option>
+	<option value="Drow Ranger">Drow Ranger</option>
+	<option value="Earth Spirit">Earth Spirit</option>
+	<option value="Earthshaker">Earthshaker</option>
+	<option value="Elder Titan">Elder Titan</option>
+	<option value="Ember Spirit">Ember Spirit</option>
+	<option value="Enchantress">Enchantress</option>
+	<option value="Enigma">Enigma</option>
+	<option value="Faceless Void">Faceless Void</option>
+	<option value="Gyrocopter">Gyrocopter</option>
+	<option value="Huskar">Huskar</option>
+	<option value="Invoker">Invoker</option>
+	<option value="Io">Io</option>
+	<option value="Jakiro">Jakiro</option>
+	<option value="Juggernaut">Juggernaut</option>
+	<option value="Keeper of the Light">Keeper of the Light</option>
+	<option value="Kunkka">Kunkka</option>
+	<option value="Legion Commander">Legion Commander</option>
+	<option value="Leshrac">Leshrac</option>
+	<option value="Lich">Lich</option>
+	<option value="Lifestealer">Lifestealer</option>
+	<option value="Lina">Lina</option>
+	<option value="Lion">Lion</option>
+	<option value="Lone Druid">Lone Druid</option>
+	<option value="Luna">Luna</option>
+	<option value="Lycan">Lycan</option>
+	<option value="Magnus">Magnus</option>
+	<option value="Medusa">Medusa</option>
+	<option value="Meepo">Meepo</option>
+	<option value="Mirana">Mirana</option>
+	<option value="Monkey King">Monkey King</option>
+	<option value="Morphling">Morphling</option>
+	<option value="Naga Siren">Naga Siren</option>
+	<option value="Nature's Prophet">Nature's Prophet</option>
+	<option value="Necrophos">Necrophos</option>
+	<option value="Night Stalker">Night Stalker</option>
+	<option value="Nyx Assassin">Nyx Assassin</option>
+	<option value="Ogre Magi">Ogre Magi</option>
+	<option value="Omniknight">Omniknight</option>
+	<option value="Oracle">Oracle</option>
+	<option value="Outworld Devourer">Outworld Devourer</option>
+	<option value="Phantom Assassin">Phantom Assassin</option>
+	<option value="Phantom Lancer">Phantom Lancer</option>
+	<option value="Phoenix">Phoenix</option>
+	<option value="Puck">Puck</option>
+	<option value="Pudge">Pudge</option>
+	<option value="Pugna">Pugna</option>
+	<option value="Queen of Pain">Queen of Pain</option>
+	<option value="Razor">Razor</option>
+	<option value="Riki">Riki</option>
+	<option value="Rubick">Rubick</option>
+	<option value="Sand King">Sand King</option>
+	<option value="Shadow Demon">Shadow Demon</option>
+	<option value="Shadow Fiend">Shadow Fiend</option>
+	<option value="Shadow Shaman">Shadow Shaman</option>
+	<option value="Silencer">Silencer</option>
+	<option value="Skywrath Mage">Skywrath Mage</option>
+	<option value="Slardar">Slardar</option>
+	<option value="Slark">Slark</option>
+	<option value="Sniper">Sniper</option>
+	<option value="Spectre">Spectre</option>
+	<option value="Spirit Breaker">Spirit Breaker</option>
+	<option value="Storm Spirit">Storm Spirit</option>
+	<option value="Sven">Sven</option>
+	<option value="Techies">Techies</option>
+	<option value="Templar Assassin">Templar Assassin</option>
+	<option value="Terrorblade">Terrorblade</option>
+	<option value="Tidehunter">Tidehunter</option>
+	<option value="Timbersaw">Timbersaw</option>
+	<option value="Tinker">Tinker</option>
+	<option value="Tiny">Tiny</option>
+	<option value="Treant Protector">Treant Protector</option>
+	<option value="Troll Warlord">Troll Warlord</option>
+	<option value="Tusk">Tusk</option>
+	<option value="Underlord">Underlord</option>
+	<option value="Undying">Undying</option>
+	<option value="Ursa">Ursa</option>
+	<option value="Vengeful Spirit">Vengeful Spirit</option>
+	<option value="Venomancer">Venomancer</option>
+	<option value="Viper">Viper</option>
+	<option value="Visage">Visage</option>
+	<option value="Warlock">Warlock</option>
+	<option value="Weaver">Weaver</option>
+	<option value="Windranger">Windranger</option>
+	<option value="Winter Wyvern">Winter Wyvern</option>
+	<option value="Witch Doctor">Witch Doctor</option>
+	<option value="Wraith King">Wraith King</option>
+    <option value="Zeus">Zeus</option>
+  </select>
+  <br>
+  <select name="meta">
+	<option value="">Metagame</option>
+	<option value="Farm">Farm</option>
+	<option value="Push">Push</option>
+	<option value="Split Push">Split Push</option>
+	<option value="Team Fight">Team Fight</option>
+  </select>
+  <br><br>
+  <input type="submit">
+</form>
+</div>
+
+<script type="text/javascript" src="CountriesGeoJSON.js"></script>
+<script type="text/javascript"  src="bootstrap-slider.js"></script>
+<script type="text/javascript">
+	var geojson;
+	var leagueid = 5157;
+	var globalkillsaverage = CalcKills(leagueid);
+	var map = L.map('map', { zoomControl: false }).setView([30,0], 2);
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		id: 'mapbox.dark'
+	}).addTo(map);
+
+	L.control.zoom({
+     position:'bottomright'
+	}).addTo(map);
+	
+	// control that shows region stats on click
+	var info = L.control();
+	info.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this._div.innerHTML = '<h4 id="headercontainer"></h4>'
+								+ '<p id="responsecontainer"></p>' 
+								+ '<p id="responsecontainer2"></p>'
+								+ '<p id="responsecontainer3"></p>'
+								+ '<p id="responsecontainer4"></p>'
+								+ '<p id="responsecontainer5"></p>'
+								+ '<canvas id="test" width="200" height="100" style="border:1px solid #000000;"></canvas>';
+
+		return this._div;
+	};
+	info.update = function (feature, leagueid) {
+		var headertext = 'Region: ' + feature.properties.name;
+		$("#headercontainer").html(headertext);
+		var global_average = '';
+		var clusters = feature.properties.clusters;
+		$.ajax({
+			type: 'post',
+			url: 'hero_frequency.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+				$("#responsecontainer").html('');
+				var array = JSON.parse(response);
+				document.getElementById("responsecontainer").innerHTML = "<b>Top 10 Picked Heroes</b>" + "<br>";
+				for (i=1; i< array.length; i=i+2) {
+					document.getElementById("responsecontainer").innerHTML += array[i-1] + " " + array[i] + "<br>";
+				}
+			}
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'duration.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+			$("#responsecontainer2").html('');
+				var duration = JSON.parse(response);
+				$("#responsecontainer2").html('<b>Average Game Duration: </b>' + duration);
+				
+			}
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'first_blood.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+			$("#responsecontainer3").html('');
+				var first_blood = JSON.parse(response);
+				$("#responsecontainer3").html('<b>Average First Blood Time: </b>' + first_blood);
+				
+			}
+		});
+		
+		$.ajax({
+			type: 'post',
+			url: 'kills_per_min.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+				$("#responsecontainer5").html('');
+				var average = JSON.parse(response);
+				$("#responsecontainer5").html('<b>Average Kills per Min: </b>' + average);
+			}
+		});
+		var myCloud = [["one", 1],["two", 2],["three",3],["four",4],["five",5],["six",6],["seven",7],["eight",8],["nine",9],["ten",10]];
+WordCloud(document.getElementById("test"), {list: myCloud, weightFactor: 4, minRotation: -1.57,maxRotation: 1.57, rotationSteps: 2});
+	};
+	
+	info.addTo(map);
+	
+	var slider = L.control({position: "bottomleft"});
+	slider.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'slider');
+		this._div.innerHTML = '<input id="timeslide" data-slider-id=\'ex1Slider\' type="text" data-slider-ticks="[1, 2, 3, 4]" />';
+		return this._div;
+	};
+	slider.addTo(map);
+	
+	// Disable dragging when user's cursor enters the element
+    slider.getContainer().addEventListener('mouseover', function () {
+        map.dragging.disable();
+    });
+
+    // Re-enable dragging when user's cursor leaves the element
+    slider.getContainer().addEventListener('mouseout', function () {
+        map.dragging.enable();
+    });
+	
+	$("#timeslide").slider({
+		ticks: [1, 2, 3, 4],
+		ticks_labels: ['Man 2016', 'Int 2016','Bos 2016', 'Kiev 2017'],
+		ticks_snap_bounds: 30,
+		tooltip_position: 'bottom'
+	});
+	
+	$("#timeslide").on("slideStop", function(slideEvt) {
+		
+		if(slideEvt.value == 1){
+			leagueid = 4479;
+		}
+		if(slideEvt.value == 2){
+			leagueid = 4664;
+		}
+		else if(slideEvt.value == 3){
+			leagueid = 4874;
+		}
+		else if(slideEvt.value == 4){
+			leagueid = 5157;
+		}
+		globalkillsaverage = CalcKills(leagueid);
+		geojson.eachLayer( function (layer) {
+			//info.update(layer.feature, leagueid);
+			//alert(layer.feature.properties.name);
+			layer.setStyle({fillColor: getColor(layer.feature, leagueid, globalkillsaverage)});
+		});
+	});
+	
+	var marker = [];
+	var CountriesGeoJSON;
+	
+	function getColor(feature, leagueid, globalave) {
+		var colour = '#d1d1d1';
+		var clusters = feature.properties.clusters;
+		$.ajax({
+			async: false,
+			type: 'post',
+			url: 'kills_per_min.php',
+			data: {clusters, leagueid},
+			success: function(response) {
+				if (response == 'ERROR')
+				{
+					//alert(response);
+				}
+				else
+				{
+					var average = JSON.parse(response);
+					var difference;
+					//Blue
+					if (average < globalave)
+					{
+						difference = (globalave - average) / (globalave) * 100;
+						if (difference > 5){colour = '#002770'}
+						else if (difference > 4){colour = '#0045c4'}
+						else if (difference > 3){colour = '#005aff'}
+						else if (difference > 2){colour = '#5994ff'}
+						else if (difference > 1){colour = '#a3c4ff'}
+						else if (difference > 0){colour = '#c6dbff'}
+						else {colour = '#d1d1d1'};
+					}
+					//Red
+					else if (average > globalave)
+					{
+						difference = (average - globalave) / (globalave) * 100;
+						if (difference > 5){colour = '#890000'}
+						else if (difference > 4){colour = '#b50000'}
+						else if (difference > 3){colour = '#ff0000'}
+						else if (difference > 2){colour = '#ff2323'}
+						else if (difference > 1){colour = '#ff5656'}
+						else if (difference > 0){colour = '#ff9696'}
+						else {colour = '#d1d1d1'};
+					}
+					//feature.properties.color = colour;
+				}
+				
+			}
+		});
+		return colour;
+	}
+	
+	function CalcKills(leagueid) {
+		var global_average = 0;
+		$.ajax({
+			type: 'post',
+			async: false,
+			url: 'globalkills_per_min.php',
+			data: {leagueid},
+			success: function(response) {
+			$("#responsecontainer4").html('');
+				global_average = JSON.parse(response);
+				$("#responsecontainer4").html('<b>Global Average Kills per Min: </b>' + global_average);
+			}
+		});
+		return global_average;
+	}
+	
+	function CountryStyle(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '1',
+			fillOpacity: 0.7
+		};
+	}
+	
+	function highlightFeature(e) {
+		var layer = e.target;
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+	}
+	
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+		//var name = e.target.feature.properties.NAME;
+	}
+	
+	function resetHighlight(e) {
+		e.target.setStyle(CountryStyle(e));
+	}
+
+	function clickfunction(e) {
+		zoomToFeature(e);
+		info.update(e.target.feature, leagueid);
+	}
+	
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: clickfunction
+		});
+		layer.setStyle({fillColor: getColor(feature, leagueid, globalkillsaverage)});
+	}
+
+//Ajax call to DOTA2APICall.php to get match data and then display to the map		
+	function GetMatchDetails(){
+	$.ajax({
+			type: 'post',
+			url: 'api2database.php',
+			data: {},
+			success: function(response) {
+			}
+	});
+	};
+	setInterval(GetMatchDetails, 600000);
+	
+	var legend = L.control({position: 'topleft'});
+	legend.onAdd = function (feature) {
+
+		var div = L.DomUtil.create('div', 'info legend'),
+			colors = ['#002770', '#0045c4', '#005aff', '#5994ff', '#a3c4ff', '#d6e5ff', '#d1d1d1', '#ff9696', '#ff5656', '#ff2323', '#ff0000', '#b50000', '#890000'],
+			labels = [];
+			
+		labels.push(
+			'<i style="background:' + colors[0] + '"></i> ' + 'Passive'
+			);
+
+		for (var i = 1; i < colors.length-1; i++) {
+			labels.push(
+				'<i style="background:' + colors[i] + '"></i> '
+				);
+		}
+		labels.push(
+			'<i style="background:' + colors[12] + '"></i> ' + 'Aggressive'
+			);
+		
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend.addTo(map);
+	
+	//Add geojson file
+	geojson = L.geoJson(CountriesGeoJSON, {
+		clickable: true,
+		style: CountryStyle,
+		onEachFeature: onEachFeature
+	}).addTo(map);
+	
+</script>
+
+<script src="wordcloud2.js"></script>
+
+</body>
+</html>

@@ -15,6 +15,15 @@ $meme = $_GET("meme");
 $role = $_GET("role");
 $hero = $_GET("hero");
 //combine role+hero
+$role .= " ";
+$role .= $hero;
 $meta = $_GET("meta");
+
+$querystatement = 'INSERT INTO "WordCloud" (region, meme, role, meta)'
+								. ' VALUES ('.$region.','.$meme.','.$role.','.$meta.')';
+$query = $conn->query($querystatement);	
 //user tags, can be empty
+}catch (PDOException $e){
+// report error message
+var_dump($e->getMessage());
 }?>
